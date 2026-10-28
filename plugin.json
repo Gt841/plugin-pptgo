@@ -2,7 +2,7 @@
   "name": "plugin-pptgo",
   "author": "Gt841",
   "url": "https://github.com/Gt841/plugin-pptgo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "minAppVersion": "3.0.1",
   "backends": [
     "windows",

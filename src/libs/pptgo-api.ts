@@ -88,11 +88,35 @@ function asList(data: any): any[] {
     return [];
 }
 
-/** 个人空间信息：{ team_id, project_id } */
-export async function getSpaceConfig() {
-    const resp = await request("/web/space", { method: "GET" });
+/**
+ * 个人空间信息：{ team_id, project_id }
+ * www 部署下 /web/space 不可用，改为取团队列表中的个人团队（type=1），
+ * 再调用 /web/personal/v1/space 获取默认项目。
+ */
+export async function getSpaceConfig(teams?: any[]) {
+    const teamList = teams || (await getTeams());
+    const personal =
+        teamList.find((item) => item && item.type === 1) || teamList[0];
+    if (!personal) return null;
+
+    const resp = await request(
+        `/web/personal/v1/space?team_id=${personal.id}`,
+        { method: "GET" },
+    );
     const res = await parse(resp);
-    return res.ok ? res.data : null;
+    if (res.ok && res.data && res.data.project_id) {
+        return {
+            team_id: res.data.team_id ?? personal.id,
+            project_id: res.data.project_id,
+        };
+    }
+
+    // 兜底：取该团队下的第一个项目
+    const projects = await getProjects(personal.id);
+    if (projects.length > 0) {
+        return { team_id: personal.id, project_id: projects[0].id };
+    }
+    return null;
 }
 
 /** 团队列表：{ list: [...] } */
@@ -141,8 +165,10 @@ export async function getFiles(
     project_id,
     folder_id = 0,
 ): Promise<any[]> {
+    // v1 的 files 路由在当前网关已下线，v2 需要分页参数
     const resp = await request(
-        `/web/team/${team_id}/project/${project_id}/files?folder_id=${folder_id}`,
+        `/web/team/v2/team/${team_id}/project/${project_id}/files` +
+            `?folder_id=${folder_id}&page_no=1&page_size=200`,
         { method: "GET" },
     );
     const res = await parse(resp);

@@ -1,6 +1,6 @@
 {
   "name": "plugin-pptgo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "PPTGo files in SiYuan",
   "repository": "https://github.com/Gt841/plugin-pptgo",

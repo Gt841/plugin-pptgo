@@ -424,7 +424,9 @@
             return;
         }
 
-        let spaceRes = await getSpaceConfig();
+        // 团队列表既用于个人空间定位，也用于展示其它团队
+        let teamRes = await getTeams();
+        let spaceRes = await getSpaceConfig(teamRes);
         let team_id = spaceRes?.team_id ?? 0;
         let project_id = spaceRes?.project_id ?? 0;
 
@@ -455,7 +457,6 @@
         }
 
         // 其它团队：展开后再加载项目
-        let teamRes = await getTeams();
         teamRes.forEach((item) => {
             if (!item || item.id == null) return;
             // 个人空间已经单独展示
